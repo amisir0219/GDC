@@ -25,7 +25,13 @@ jobs:
             GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
             service_account_email: githubactions@buoyant-set-297200.iam.gserviceaccount.com
             service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-            
+   
+        - name: Get Secret Manager secrets
+          id: 'secrets'
+          uses: google-github-actions/get-secretmanager-secrets@v0
+          with:
+            secrets: |-
+              GCP_PROJECT_ID:projects/502135548825/secrets/GCP_PROJECT_ID/versions/1
             
         - name: Configure Docker
           run: gcloud auth configure-docker --quiet
@@ -42,4 +48,4 @@ jobs:
           run: docker push $IMAGE_NAME
 
         - name: Deploy Docker image
-          run:  gcloud run deploy ${{ secrets.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ secrets.GCP_PROJECT_ID }}
+          run:  gcloud run deploy ${{ secrets.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ steps.secrets.outputs.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ steps.secrets.outputs.GCP_PROJECT_ID }}
