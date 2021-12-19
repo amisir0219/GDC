@@ -28,7 +28,7 @@ jobs:
           uses: google-github-actions/get-secretmanager-secrets@v0.3.1
           with:
             secrets: |-
-              GCP_EMAIL:projects/buoyant-set-297200/secrets/GCP_EMAIL/versions/1
+              GCP_EMAIL:projects/502135548825/secrets/GCP_EMAIL/versions/1
             
         - name: Login
           uses: google-github-actions/setup-gcloud@master
