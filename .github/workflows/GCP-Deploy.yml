@@ -32,7 +32,7 @@ jobs:
               GCP_PROJECT_ID:projects/502135548825/secrets/GCP_PROJECT_ID/versions/1
             
         - name: Configure Docker
-          run: gcloud auth configure-docker --account
+          run: gcloud auth configure-docker --account 'githubactions@buoyant-set-297200.iam.gserviceaccount.com'
             
         - name: Checkout repository
           uses: actions/checkout@v2
