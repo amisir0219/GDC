@@ -52,3 +52,4 @@ jobs:
 
         - name: Deploy Docker image
           run:  gcloud run deploy ${{ steps.secrets.outputs.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ steps.secrets.outputs.GCP_PROJECT_ID }}/${{ steps.secrets.outputs.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ steps.secrets.outputs.GCP_PROJECT_ID }}
+          
