@@ -39,21 +39,3 @@ LD_LIBRARY_PATH=\"$JVM_LD_LIBRARY_PATH\":\$this_dir \
 \$@" > $OUT/$fuzzer_basename
   chmod +x $OUT/$fuzzer_basename
 done
-The java-example project contains an example of a build.sh for Java projects with native libraries.
-
-FuzzedDataProvider
-Jazzer provides a FuzzedDataProvider that can simplify the task of creating a fuzz target by translating the raw input bytes received from the fuzzer into useful primitive Java types. Its functionality is similar to FuzzedDataProviders available in other languages, such as Python and C++.
-
-On OSS-Fuzz, the required library is available in the base docker images under the path $JAZZER_API_PATH, which is added to the classpath by the example build script shown above. Locally, the library can be obtained from Maven Central.
-
-A fuzz target using the FuzzedDataProvider would look as follows:
-
-import com.code_intelligence.jazzer.api.FuzzedDataProvider;
-
-public class ExampleFuzzer {
-    public static void fuzzerTestOneInput(FuzzedDataProvider data) {
-        int number = data.consumeInt();
-        String string = data.consumeRemainingAsString();
-        // ...
-    }
-}
