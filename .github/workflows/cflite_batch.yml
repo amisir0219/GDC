@@ -16,7 +16,7 @@ jobs:
       uses: google/clusterfuzzlite/actions/run_fuzzers@v1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        fuzz-seconds: 120
+        fuzz-seconds: 240
         mode: 'batch'
         # Git storage repo options.
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/amisir0219/GDC-storage.git
