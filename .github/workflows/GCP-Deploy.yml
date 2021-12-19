@@ -36,7 +36,7 @@ jobs:
           with:
             GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
             service_account_email: ${{ steps.secrets.outputs.GCP_EMAIL }}
-            service_account_key: ${{ steps.secrets.outputs.GCP_CREDENTIALS }}
+            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
             
             
         - name: Configure Docker
