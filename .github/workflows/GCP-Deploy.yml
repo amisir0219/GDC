@@ -33,6 +33,14 @@ jobs:
             project_id: '${{ secrets.GCP_PROJECT_ID }}'
             service_account: '${{ secrets.GCP_EMAIL }}'
             
+        - name: Get Secret Manager secrets
+          id: 'secrets'
+          uses: google-github-actions/get-secretmanager-secrets@v0.3.1
+          with:
+            secrets: |-
+              GCP_APP_NAME:projects/502135548825/secrets/GCP_APP_NAME/versions/1
+              GCP_PROJECT_ID:projects/502135548825/secrets/GCP_PROJECT_ID/versions/1
+            
 
 
         - name: Build Docker image
@@ -43,4 +51,4 @@ jobs:
           run: sudo docker push $IMAGE_NAME 
 
         - name: Deploy Docker image
-          run:  gcloud run deploy ${{ secrets.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ secrets.GCP_PROJECT_ID }}
+          run:  gcloud run deploy ${{ steps.secrets.outputs.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ steps.secrets.outputs.GCP_PROJECT_ID }}/${{ steps.secrets.outputs.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ steps.secrets.outputs.GCP_PROJECT_ID }}
