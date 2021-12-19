@@ -17,25 +17,13 @@ jobs:
           IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
         steps:
         
-        - name: Auth
-          id: 'auth'
-          uses: 'google-github-actions/auth@v0'
-          with:
-            credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-            
-        - name: Get Secret Manager secrets
-          id: 'secrets'
-          uses: google-github-actions/get-secretmanager-secrets@v0.3.1
-          with:
-            secrets: |-
-              GCP_EMAIL:projects/502135548825/secrets/GCP_EMAIL/versions/1
-              GCP_CREDENTIALS:projects/502135548825/secrets/GCP_CREDENTIALS/versions/1
+
             
         - name: Login
           uses: google-github-actions/setup-gcloud@master
           with:
             GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-            service_account_email: ${{ steps.secrets.outputs.GCP_EMAIL }}
+            service_account_email: githubactions@buoyant-set-297200.iam.gserviceaccount.com
             service_account_key: ${{ secrets.GCP_CREDENTIALS }}
             
             
