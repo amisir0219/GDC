@@ -1,52 +1,33 @@
-#!/bin/bash -eu
-# Copyright 2021 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-################################################################################
+# Step 1: Build the project
 
-# Move seed corpus and dictionary.
-mv $SRC/{*.zip,*.dict} $OUT
-
-# Build the json-sanitizer jar.
+# Build the project .jar as usual, e.g. using Maven.
+mvn package
+# In this example, the project is built with Maven, which typically includes the
+# project version into the name of the packaged .jar file. The version can be
+# obtained as follows:
 CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate \
 -Dexpression=project.version -q -DforceStdout)
-mvn package
-cp "target/json-sanitizer-$CURRENT_VERSION.jar" $OUT/json-sanitizer.jar
+# Copy the project .jar into $OUT under a fixed name.
+cp "target/sample-project-$CURRENT_VERSION.jar" $OUT/sample-project.jar
 
-# The jar files containing the project (separated by spaces).
-PROJECT_JARS=json-sanitizer.jar
+# Specify the projects .jar file(s), separated by spaces if there are multiple.
+PROJECT_JARS="sample-project.jar"
 
-# Get the fuzzer dependencies (gson).
-mvn dependency:copy -Dartifact=com.google.code.gson:gson:2.8.6 -DoutputDirectory=$OUT/
+# Step 2: Build the fuzzers (should not require any changes)
 
-# The jar files containing further dependencies of the fuzz targets (separated
-# by spaces).
-FUZZER_JARS=gson-2.8.6.jar
+# The classpath at build-time includes the project jars in $OUT as well as the
+# Jazzer API.
+BUILD_CLASSPATH=$(echo $PROJECT_JARS | xargs printf -- "$OUT/%s:"):$JAZZER_API_PATH
 
-# Build fuzzers in $OUT.
-ALL_JARS="$PROJECT_JARS $FUZZER_JARS"
-BUILD_CLASSPATH=$(echo $ALL_JARS | xargs printf -- "$OUT/%s:"):$JAZZER_API_PATH
-
-# All jars and class files lie in the same directory as the fuzzer at runtime.
-RUNTIME_CLASSPATH=$(echo $ALL_JARS | xargs printf -- "\$this_dir/%s:"):.:\$this_dir
+# All .jar and .class files lie in the same directory as the fuzzer at runtime.
+RUNTIME_CLASSPATH=$(echo $PROJECT_JARS | xargs printf -- "\$this_dir/%s:"):\$this_dir
 
 for fuzzer in $(find $SRC -name '*Fuzzer.java'); do
   fuzzer_basename=$(basename -s .java $fuzzer)
   javac -cp $BUILD_CLASSPATH $fuzzer
   cp $SRC/$fuzzer_basename.class $OUT/
 
-  # Create execution wrapper.
+  # Create an execution wrapper that executes Jazzer with the correct arguments.
   echo "#!/bin/sh
 # LLVMFuzzerTestOneInput for fuzzer detection.
 this_dir=\$(dirname \"\$0\")
@@ -54,7 +35,25 @@ LD_LIBRARY_PATH=\"$JVM_LD_LIBRARY_PATH\":\$this_dir \
 \$this_dir/jazzer_driver --agent_path=\$this_dir/jazzer_agent_deploy.jar \
 --cp=$RUNTIME_CLASSPATH \
 --target_class=$fuzzer_basename \
---jvm_args=\"-Xmx2048m\" \
+--jvm_args=\"-Xmx2048m:-Djava.awt.headless=true\" \
 \$@" > $OUT/$fuzzer_basename
   chmod +x $OUT/$fuzzer_basename
 done
+The java-example project contains an example of a build.sh for Java projects with native libraries.
+
+FuzzedDataProvider
+Jazzer provides a FuzzedDataProvider that can simplify the task of creating a fuzz target by translating the raw input bytes received from the fuzzer into useful primitive Java types. Its functionality is similar to FuzzedDataProviders available in other languages, such as Python and C++.
+
+On OSS-Fuzz, the required library is available in the base docker images under the path $JAZZER_API_PATH, which is added to the classpath by the example build script shown above. Locally, the library can be obtained from Maven Central.
+
+A fuzz target using the FuzzedDataProvider would look as follows:
+
+import com.code_intelligence.jazzer.api.FuzzedDataProvider;
+
+public class ExampleFuzzer {
+    public static void fuzzerTestOneInput(FuzzedDataProvider data) {
+        int number = data.consumeInt();
+        String string = data.consumeRemainingAsString();
+        // ...
+    }
+}
