@@ -13,4 +13,4 @@ clean:
 	rm -fv *.a *.o *unittest *_fuzzer *_seed_corpus.zip crash-* *.zip
 
 
-standalone.o: ExampleFuzzer.java
+standalone.o: ExampleFuzzer.cpp
