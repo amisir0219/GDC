@@ -14,18 +14,9 @@ jobs:
         name: Setup Gcloud Account
         runs-on: ubuntu-latest
         env:
-          IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
+          IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }
+          
         steps:
-        
-            
-            
-        - name: Auth
-          id: 'auth'
-          uses: 'google-github-actions/auth@v0'
-          with:
-            credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-            project_id: '${{ secrets.GCP_PROJECT_ID }}'
-            service_account: '${{ secrets.GCP_EMAIL }}'
           
             
         - name: Configure Docker
@@ -33,13 +24,21 @@ jobs:
             
         - name: Checkout repository
           uses: actions/checkout@v2
+          
+        - name: Auth
+          id: 'auth'
+          uses: 'google-github-actions/auth@v0'
+          with:
+            credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+            project_id: '${{ secrets.GCP_PROJECT_ID }}'
+            service_account: '${{ secrets.GCP_EMAIL }}'
 
         - name: Build Docker image
           run: docker build . -t $IMAGE_NAME 
 
 
         - name: Push Docker image
-          run: docker push $IMAGE_NAME -account '${{ secrets.GCP_EMAIL }}'
+          run: docker push $IMAGE_NAME 
 
         - name: Deploy Docker image
           run:  gcloud run deploy ${{ secrets.GCP_APP_NAME }} --region us-central1 --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }} --platform managed --allow-unauthenticated --project ${{ secrets.GCP_PROJECT_ID }}
