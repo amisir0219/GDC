@@ -1,0 +1,1 @@
+standalone.o: ExampleFuzzer.java
