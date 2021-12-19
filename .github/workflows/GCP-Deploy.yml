@@ -27,7 +27,7 @@ jobs:
           
             
         - name: Configure Docker
-          run: sudo gcloud auth configure-docker --quiet
+          run: gcloud auth configure-docker --quiet
             
         - name: Checkout repository
           uses: actions/checkout@v2
