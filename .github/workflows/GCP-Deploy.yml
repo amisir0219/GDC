@@ -29,13 +29,14 @@ jobs:
           with:
             secrets: |-
               GCP_EMAIL:projects/502135548825/secrets/GCP_EMAIL/versions/1
+              GCP_CREDENTIALS:projects/502135548825/secrets/GCP_CREDENTIALS/versions/1
             
         - name: Login
           uses: google-github-actions/setup-gcloud@master
           with:
             GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
             service_account_email: ${{ steps.secrets.outputs.GCP_EMAIL }}
-            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+            service_account_key: ${{ steps.secrets.outputs.GCP_CREDENTIALS }}
             
             
         - name: Configure Docker
