@@ -1,0 +1,69 @@
+name: 'run-fuzzers'
+description: 'Runs fuzz target binaries.'
+inputs:
+  language:
+    description: 'Programming language project is written in.'
+    required: false
+    default: 'c++'
+  fuzz-seconds:
+    description: 'The total time allotted for fuzzing in seconds.'
+    required: true
+    default: 600
+  dry-run:
+    description: 'If set, run the action without actually reporting a failure.'
+    default: false
+  sanitizer:
+    description: 'The sanitizer to run the fuzzers with.'
+    default: 'address'
+  mode:
+    description: |
+      The mode to run the fuzzers with ("code-change", "batch", "coverage", or "prune").
+      "code-change" is for fuzzing a pull request or commit.
+      "batch" is for non-interactive fuzzing of an entire project.
+      "coverage" is for coverage generation.
+      "prune" is for corpus pruning.
+    required: false
+    default: 'code-change'
+  github-token:
+    description: |
+      Token for GitHub API.
+      You should use "secrets.GITHUB_TOKEN" in your workflow file, do not
+      hardcode the token.
+      TODO(https://github.com/google/oss-fuzz/pull/5841#discussion_r639393361):
+      Document locking this down.
+    required: true
+  storage-repo:
+    description: |
+      The git repo to use for storing certain artifacts from fuzzing.
+    required: false
+  storage-repo-branch:
+    description: |
+      The branch of the git repo to use for storing certain artifacts from
+      fuzzing.
+    default: main
+    required: false
+  storage-repo-branch-coverage:
+    description: |
+      The branch of the git repo to use for storing coverage reports.
+    default: gh-pages
+    required: false
+  report-unreproducible-crashes:
+    description: 'If True, then unreproducible crashes will be reported by ClusterFuzzLite.'
+    required: false
+    default: false
+runs:
+  using: 'docker'
+  image: 'docker://gcr.io/oss-fuzz-base/clusterfuzzlite-run-fuzzers:v1'
+  env:
+    FUZZ_SECONDS: ${{ inputs.fuzz-seconds }}
+    MODE: ${{ inputs.mode }}
+    LANGUAGE: ${{ inputs.language }}
+    DRY_RUN: ${{ inputs.dry-run}}
+    SANITIZER: ${{ inputs.sanitizer }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    LOW_DISK_SPACE: 'True'
+    GIT_STORE_REPO: ${{ inputs.storage-repo }}
+    GIT_STORE_BRANCH: ${{ inputs.storage-repo-branch }}
+    GIT_STORE_BRANCH_COVERAGE: ${{ inputs.storage-repo-branch-coverage }}
+    REPORT_UNREPRODUCIBLE_CRASHES: ${{ inputs.report-unreproducible-crashes }}
+    CFL_PLATFORM: 'github'
